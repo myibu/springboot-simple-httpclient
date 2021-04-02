@@ -1,0 +1,85 @@
+// https://central.sonatype.org/pages/gradle.html
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'signing'
+
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+signing {
+    sign configurations.archives
+}
+
+group = 'com.github.myibu'
+archivesBaseName = "springboot-simple-httpclient"
+version = "1.0.0"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation("com.github.myibu:simple-httpclient:1.0.0")
+    implementation 'org.springframework:spring-core:5.1.2.RELEASE'
+    implementation 'org.springframework:spring-context:5.1.2.RELEASE'
+    implementation 'org.springframework.boot:spring-boot:2.1.0.RELEASE'
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            repository(url: "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            snapshotRepository(url: "https://s01.oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            pom.project {
+                name 'springboot-simple-httpclient'
+                packaging 'jar'
+                // optionally artifactId can be defined here
+                description 'simple httpclient support for springboot'
+                url 'https://github.com/myibu/springboot-simple-httpclient'
+
+                scm {
+                    connection 'scm:svn:http://foo.googlecode.com/svn/trunk/'
+                    developerConnection 'scm:svn:https://foo.googlecode.com/svn/trunk/'
+                    url 'http://foo.googlecode.com/svn/trunk/'
+                }
+
+                licenses {
+                    license {
+                        name 'The Apache License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'myibu'
+                        name 'myibu'
+                        email '1337078409@qq.com'
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+jar.enabled = true
